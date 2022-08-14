@@ -18,7 +18,14 @@ public static int main(string[] argv) {
     csq_wrap_gtk_main(vm);
     csq_wrap_module(vm);
 
-    vm.do_file("hello.nut", false, true);
+    stdout.printf("%s\n", argv[1]);
+
+    if(argv.length > 1) {
+        vm.do_file(argv[1], false, true);
+    }
+    else {
+        stdout.printf("usage: csq [file]\n");
+    }
 
     return 0;
 }

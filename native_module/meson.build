@@ -26,3 +26,5 @@ add_global_arguments(['-fPIC'], language: 'c')
 lib = shared_library('native_module', sources,
   dependencies: dependencies,
   install: false)
+
+meson.add_install_script('install.sh')
