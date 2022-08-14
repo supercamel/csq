@@ -12,13 +12,17 @@ dependencies = [
 source = files(
   'main.vala',
   'module.vala',
+  'object_wrapper.vala',
+  'callback.vala',
+  'ui/ui.vala',
   'ui/window.vala',
   'ui/box.vala',
   'ui/label.vala',
   'ui/button.vala',
   'ui/entry.vala',
   'ui/treeview.vala',
-  'ui/main_loop.vala'
+  'ui/main_loop.vala',
+  'ui/widget.vala'
   )
 
 executable('csq', source, dependencies: dependencies)

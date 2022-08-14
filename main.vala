@@ -52,13 +52,8 @@ class csqApp : Application
         File file = File.new_for_path(path);
 	    if (file.query_exists() && file.query_file_type(FileQueryInfoFlags.NONE) == FileType.REGULAR) {
             vm.push_root_table();
-            csq_wrap_gtk_window(vm);
-            csq_wrap_gtk_box(vm);
-            csq_wrap_gtk_label(vm);
-            csq_wrap_gtk_button(vm);
-            csq_wrap_gtk_entry(vm);
-            csq_wrap_gtk_treeview(vm);
-            csq_wrap_gtk_main(vm);
+            
+            ui.init(vm);
 
             loaded_modules = new SList<string>();
             loaded_modules.append(path);

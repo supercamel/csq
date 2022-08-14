@@ -1,25 +1,8 @@
 
-
-class BoxWrap : Gtk.Box
+namespace ui
 {
-    public BoxWrap(Squirrel.Vm v, Gtk.Orientation o, int s)
-    {
-        orientation = o;
-        spacing = s;
-        vm = v;
-    }
 
-    ~BoxWrap() {
-        for(int i = 0; i < callbacks.length(); i++) {
-            Squirrel.Obj o = callbacks.nth_data(i);
-            vm.release(o);
-        }
-    }        
-    public SList<Squirrel.Obj> callbacks;
-    private Squirrel.Vm vm;
-}
-
-public void csq_wrap_gtk_box(Squirrel.Vm vm)
+private void expose_box(Squirrel.Vm vm)
 {
     vm.push_string("Orientation");
     vm.new_table();
@@ -47,12 +30,12 @@ public void csq_wrap_gtk_box(Squirrel.Vm vm)
         vm.get_int(2, out o);
         vm.get_int(3, out s);
 
-        BoxWrap wr = new BoxWrap(vm, (Gtk.Orientation)o, (int)s);
+        var wr = new Gtk.Box((Gtk.Orientation)o, (int)s);
         vm.set_instance_up(1, wr);
         wr.ref();
 
         vm.set_release_hook(-1, (ptr, sz) => {
-            BoxWrap m = ptr as BoxWrap;
+            var m = ptr as Gtk.Box;
             m.unref();
             return 0; 
         });
@@ -68,8 +51,7 @@ public void csq_wrap_gtk_box(Squirrel.Vm vm)
             vm.throw_error("InvalidArgumentCount");
             return -1;
         }
-        BoxWrap* b;
-        vm.get_instance_up(1, out b, null, false);
+        var box = vm.get_instance(1) as Gtk.Box;
         Gtk.Widget* w;
         vm.get_instance_up(2, out w, null, false);
         bool expand = false;
@@ -85,9 +67,10 @@ public void csq_wrap_gtk_box(Squirrel.Vm vm)
         if(top > 4) {
             vm.get_int(5, out padding);
         }
-        b->pack_start(w, expand, fill, (int)padding);
+        box.pack_start(w, expand, fill, (int)padding);
         return 0;
     }, 0);
+    vm.set_params_check(-2, "xxbbi");
     vm.new_slot(-3, false);
 
     vm.push_string("pack_end");
@@ -97,8 +80,7 @@ public void csq_wrap_gtk_box(Squirrel.Vm vm)
             vm.throw_error("InvalidArgumentCount");
             return -1;
         }
-        BoxWrap* b;
-        vm.get_instance_up(1, out b, null, false);
+        var box = vm.get_instance(1) as Gtk.Box;
         Gtk.Widget* w;
         vm.get_instance_up(2, out w, null, false);
         bool expand = false;
@@ -114,9 +96,10 @@ public void csq_wrap_gtk_box(Squirrel.Vm vm)
         if(top > 4) {
             vm.get_int(5, out padding);
         }
-        b->pack_end(w, expand, fill, (int)padding);
+        box.pack_end(w, expand, fill, (int)padding);
         return 0;
     }, 0);
+    vm.set_params_check(-2, "xxbbi");
     vm.new_slot(-3, false);
 
     vm.push_string("set_homogeneous");
@@ -126,31 +109,28 @@ public void csq_wrap_gtk_box(Squirrel.Vm vm)
             vm.throw_error("InvalidArgumentCount");
             return -1;
         }
-        BoxWrap b = vm.get_instance(1) as BoxWrap;
+        var b = vm.get_instance(1) as Gtk.Box;
         bool h;
         vm.get_bool(2, out h);
         b.set_homogeneous(h);
         return 0;
     }, 0);
+    vm.set_params_check(2, "xb");
     vm.new_slot(-3, false);
 
     vm.push_string("set_spacing");
     vm.new_closure((vm) => {
-        var top = vm.get_top();
-        if(top != 2) {
-            vm.throw_error("InvalidArgumentCount");
-            return -1;
-        }
-        BoxWrap b = vm.get_instance(1) as BoxWrap;
+        var b = vm.get_instance(1) as Gtk.Box;
         long s;
         vm.get_int(2, out s);
         b.set_spacing((int)s);
         return 0;
     } , 0);
+    vm.set_params_check(2, "xi");
     vm.new_slot(-3, false);
 
 
     vm.new_slot(-3, false); 
 }
 
-
+}

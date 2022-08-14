@@ -1,44 +1,33 @@
-
-
-class LabelWrap : Gtk.Label
+namespace ui
 {
-    public LabelWrap(Squirrel.Vm v)
-    {
-        vm = v;
-    }
 
-    ~LabelWrap() {
-        for(int i = 0; i < callbacks.length(); i++) {
-            Squirrel.Obj o = callbacks.nth_data(i);
-            vm.release(o);
-        }
-    }        
-    public SList<Squirrel.Obj> callbacks;
-    private Squirrel.Vm vm;
-}
-
-
-public void csq_wrap_gtk_label(Squirrel.Vm vm)
+private void expose_label(Squirrel.Vm vm)
 {
     vm.push_string("Label");
     vm.new_class(false);
 
+    expose_object_base(vm);
+    expose_widget_base(vm);
+
     vm.push_string("constructor");
     vm.new_closure((vm) => {
-        LabelWrap wr = new LabelWrap(vm);
+        Gtk.Label wr;
 
         var top = vm.get_top();
         if(top > 1) {
             string text = "";
             vm.get_string(2, out text);
-            wr.set_text(text);
+            wr = new Gtk.Label(text);
+        }
+        else {
+            wr = new Gtk.Label("");
         }
 
         vm.set_instance_up(1, wr);
         wr.ref();
 
         vm.set_release_hook(-1, (ptr, sz) => {
-            BoxWrap m = ptr as BoxWrap;
+            var m = ptr as Gtk.Label;
             m.unref();
             return 0; 
         });
@@ -52,7 +41,7 @@ public void csq_wrap_gtk_label(Squirrel.Vm vm)
         if(top > 1) {
             string text = "";
             vm.get_string(2, out text);
-            LabelWrap wr = vm.get_instance(1) as LabelWrap;
+            var wr = vm.get_instance(1) as Gtk.Label;
             wr.set_text(text);
         }
         else {
@@ -64,7 +53,7 @@ public void csq_wrap_gtk_label(Squirrel.Vm vm)
 
     vm.push_string("get_text");
     vm.new_closure((vm) => {
-        LabelWrap wr = vm.get_instance(1) as LabelWrap;
+        var wr = vm.get_instance(1) as Gtk.Label;
         string text = wr.get_text();
         vm.push_string(text);
         return 1;
@@ -73,7 +62,7 @@ public void csq_wrap_gtk_label(Squirrel.Vm vm)
 
     vm.push_string("set_use_markup");
     vm.new_closure((vm) => {
-        LabelWrap br = vm.get_instance(1) as LabelWrap;
+        var br = vm.get_instance(1) as Gtk.Label;
         bool use_markup = false;
         vm.get_bool(2, out use_markup);
         br.set_use_markup(use_markup);
@@ -88,7 +77,7 @@ public void csq_wrap_gtk_label(Squirrel.Vm vm)
         if(top > 1) {
             double align = 0.0;
             vm.get_float(2, out align);
-            LabelWrap wr = vm.get_instance(1) as LabelWrap;
+            var wr = vm.get_instance(1) as Gtk.Label;
             wr.set_xalign((float)align);
         }
         else {
@@ -104,7 +93,7 @@ public void csq_wrap_gtk_label(Squirrel.Vm vm)
         if(top > 1) {
             double align = 0.0;
             vm.get_float(2, out align);
-            LabelWrap wr = vm.get_instance(1) as LabelWrap;
+            var wr = vm.get_instance(1) as Gtk.Label;
             wr.set_yalign((float)align);
         }
         else {
@@ -115,4 +104,6 @@ public void csq_wrap_gtk_label(Squirrel.Vm vm)
     vm.new_slot(-3, false);
 
     vm.new_slot(-3, false);
+}
+
 }

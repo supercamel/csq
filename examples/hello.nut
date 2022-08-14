@@ -1,19 +1,16 @@
-require("examples/hello_world.nut");
-require("native_module");
-
-local window = Window();
+local window = ui.Window();
 window.show_all();
 window.set_title("Hello World");
-window.connect("destroy", Gtk.main_quit);
+window.connect("destroy", ui.main_quit);
 
-local box = Box(Orientation.VERTICAL, 5);
-local lbl = Label("Hello world!");
+local box = ui.Box(ui.Orientation.VERTICAL, 5);
+local lbl = ui.Label("Hello world!");
 lbl.set_xalign(0);
 
 box.pack_start(lbl);
-box.pack_start(Label("testing"));
-local btn = Button("Click me!");
-local entry = Entry("Enter your name");
+box.pack_start(ui.Label("testing"));
+local btn = ui.Button("Click me!");
+local entry = ui.Entry("Enter your name");
 
 btn.connect("clicked", function() {
     print(entry.get_text());
@@ -23,7 +20,7 @@ btn.connect("clicked", function() {
 box.pack_start(entry);
 box.pack_start(btn);
 
-local table = Table(["Col 1", "Col 2", "Col 3"]);
+local table = ui.Table(["Col 1", "Col 2", "Col 3"]);
 for(local i = 0; i < 10; i++)
 {
     table.add_row(["1", "2", "3"]);
@@ -46,4 +43,4 @@ window.add(box);
 
 window.show_all();
 
-Gtk.main();
+ui.main();

@@ -1,32 +1,22 @@
 
-class TableWrap : Gtk.TreeView
+namespace ui 
 {
-    public TableWrap(Squirrel.Vm v)
-    {
-        vm = v;
-        n_rows = 0;
-    }
 
-    ~TableWrap() {
-        for(int i = 0; i < callbacks.length(); i++) {
-            Squirrel.Obj o = callbacks.nth_data(i);
-            vm.release(o);
-        }
-    }        
-
-    public int n_rows;
-    public SList<Squirrel.Obj> callbacks;
-    private Squirrel.Vm vm;
-}
-
-public void csq_wrap_gtk_treeview(Squirrel.Vm vm)
+private void expose_treeview(Squirrel.Vm vm)
 {
     vm.push_string("Table");
     vm.new_class(false);
 
+    expose_object_base(vm);
+    expose_widget_base(vm);
+
+    vm.push_string("__n_rows");
+    vm.push_int(0);
+    vm.new_slot(-3, false);
+
     vm.push_string("constructor");
     vm.new_closure((vm) => {
-        TableWrap br = new TableWrap(vm);
+        var br = new Gtk.TreeView();
         vm.set_instance_up(1, br);
         br.ref();
 
@@ -50,52 +40,69 @@ public void csq_wrap_gtk_treeview(Squirrel.Vm vm)
         }
 
         vm.set_release_hook(-1, (ptr, sz) => {
-            TableWrap m = ptr as TableWrap;
+            var m = ptr as Gtk.TreeView;
             m.unref();
             return 0; 
         });
         return 1;
     }, 0);
+    vm.set_params_check(0, "");
     vm.new_slot(-3, false);
 
     vm.push_string("connect");
     vm.new_closure((vm) => {
-        TableWrap br = vm.get_instance(1) as TableWrap;
+        var br = vm.get_instance(1) as Gtk.TreeView;
 
         string signal_name;
-        vm.get_string(-2, out signal_name); // signal name is passed as the 'second last' parameter
+        vm.get_string(-2, out signal_name); 
 
         Squirrel.Obj callback;
-        vm.get_stack_object(-1, out callback); //get the callback closure as a Squirrel Object
-        vm.add_ref(callback); // reference it so the VM doesn't destroy it as it goes out of scope
+        vm.get_stack_object(-1, out callback); 
 
-        br.callbacks.append(callback); // add to the list of callbacks - so it can be unreferenced later
-
-        Squirrel.Obj self; // keep a copy of the class instance
+        Squirrel.Obj self; 
         vm.get_stack_object(-3, out self);
 
         switch(signal_name) {
             case "row-clicked":
                 br.row_activated.connect((path, column) => {
-                    /* 
                     vm.push_object(callback);
                     vm.push_object(self);
-                    vm.push_string(preedit);
-                    vm.call(2, true, true);
-                    */
+                    vm.push_int(int.parse(path.to_string()));
+
+                    var model = br.get_model() as Gtk.ListStore;
+                    Gtk.TreeIter iter;
+                    model.get_iter(out iter, path);
+
+                    vm.new_array(0);
+                    int n_columns = model.get_n_columns();
+                    for(int i = 0; i < n_columns; i++) {
+                        var val = GLib.Value(typeof(string));
+                        model.get_value(iter, i, out val);
+
+                        vm.push_string(val.get_string());
+                        vm.array_append(-2);
+                    }
+
+                    run_callback(vm, 3, signal_name);
                 });
             break;
             default:
                 return vm.throw_error("no such signal: " + signal_name);
         }
 
+        vm.push_string("__callbacks");
+        vm.get(1);
+        vm.push_object(callback);
+        vm.array_append(-2);
+
         return 0; // no values returned 
     }, 0);
+    vm.set_params_check(3, "xsc");
     vm.new_slot(-3, false);
 
     vm.push_string("add_row");
     vm.new_closure((vm) => {
-        TableWrap br = vm.get_instance(1) as TableWrap;
+        var br = vm.get_instance(1) as Gtk.TreeView;
 
         var model = br.get_model() as Gtk.ListStore;
         Gtk.TreeIter iter;
@@ -120,15 +127,30 @@ public void csq_wrap_gtk_treeview(Squirrel.Vm vm)
 
         model.set_valuesv(iter, columns, text);
 
-        br.n_rows++;
+        vm.push_string("__n_rows");
+        if(vm.get(1) != Squirrel.OK) {
+            vm.pop(1);
+            warning("Could not get __n_rows attirubte from ui.Table");
+        }
+        else {
+            long n_rows;
+            vm.get_int(-1, out n_rows);
+            n_rows++;
+            stdout.printf("n rows: %ld\n", n_rows);
+
+            vm.push_string("__n_rows");
+            vm.push_int(n_rows);
+            vm.set(1);
+        }
 
         return 0;
     }, 0);
+    vm.set_params_check(2, "xa");
     vm.new_slot(-3, false);
 
     vm.push_string("get_row");
     vm.new_closure((vm) => {
-        TableWrap br = vm.get_instance(1) as TableWrap;
+        var br = vm.get_instance(1) as Gtk.TreeView;
 
         long row_n;
         vm.get_int(2, out row_n);
@@ -149,15 +171,37 @@ public void csq_wrap_gtk_treeview(Squirrel.Vm vm)
 
         return 1;
     }, 0);
+    vm.set_params_check(2, "xi");
     vm.new_slot(-3, false);
 
     vm.push_string("get_n_rows");
     vm.new_closure((vm) => {
-        TableWrap br = vm.get_instance(1) as TableWrap;
-        vm.push_int(br.n_rows);
+        vm.push_string("__n_rows");
+        vm.get(1);
         return 1;
     }, 0);
+    vm.set_params_check(1, "x");
     vm.new_slot(-3, false);
 
+    vm.push_string("get_selected_row");
+    vm.new_closure((vm) => {
+        var br = vm.get_instance(1) as Gtk.TreeView;
+        var selection = br.get_selection();
+        Gtk.TreeModel model = br.get_model();
+        var selected_rows = selection.get_selected_rows(out model);
+        if(selected_rows.length() > 0) {
+            var path = selected_rows.nth_data(0);
+            vm.push_int(int.parse(path.to_string()));
+        } else {
+            vm.push_null();
+        }
+        return 1;
+    }, 0);
+    vm.set_params_check(1, "x");
     vm.new_slot(-3, false);
+
+
+    vm.new_slot(-3, false);
+}
+
 }

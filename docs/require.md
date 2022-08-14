@@ -20,4 +20,8 @@ Native modules are searched for in three paths in this order.
 * the PATH environment variable
 
 
+To import a native module, simply pass the name of the library to the require function.
+
     require("mylibrary");
+
+

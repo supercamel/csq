@@ -1,30 +1,18 @@
-
-class ButtonWrap : Gtk.Button 
+namespace ui 
 {
-    public ButtonWrap(Squirrel.Vm v)
-    {
-        vm = v;
-    }
-
-    ~ButtonWrap() {
-        for(int i = 0; i < callbacks.length(); i++) {
-            Squirrel.Obj o = callbacks.nth_data(i);
-            vm.release(o);
-        }
-    }        
-    public SList<Squirrel.Obj> callbacks;
-    private Squirrel.Vm vm;
-}
 
 
-public void csq_wrap_gtk_button(Squirrel.Vm vm)
+private void expose_button(Squirrel.Vm vm)
 {
     vm.push_string("Button");
     vm.new_class(false);
 
+    expose_object_base(vm);
+    expose_widget_base(vm);
+
     vm.push_string("constructor");
     vm.new_closure((vm) => {
-        ButtonWrap br = new ButtonWrap(vm);
+        var br = new Gtk.Button();
         vm.set_instance_up(1, br);
         br.ref();
 
@@ -35,7 +23,7 @@ public void csq_wrap_gtk_button(Squirrel.Vm vm)
         }
 
         vm.set_release_hook(-1, (ptr, sz) => {
-            ButtonWrap m = ptr as ButtonWrap;
+            var m = ptr as Gtk.Button;
             m.unref();
             return 0; 
         });
@@ -46,16 +34,13 @@ public void csq_wrap_gtk_button(Squirrel.Vm vm)
 
     vm.push_string("connect");
     vm.new_closure((vm) => {
-        ButtonWrap br = vm.get_instance(1) as ButtonWrap;
+        var br = vm.get_instance(1) as Gtk.Button;
 
         string signal_name;
         vm.get_string(-2, out signal_name); // signal name is passed as the 'second last' parameter
 
         Squirrel.Obj callback;
         vm.get_stack_object(-1, out callback); //get the callback closure as a Squirrel Object
-        vm.add_ref(callback); // reference it so the VM doesn't destroy it as it goes out of scope
-
-        br.callbacks.append(callback); // add to the list of callbacks - so it can be unreferenced later
 
         Squirrel.Obj self; // keep a copy of the class instance
         vm.get_stack_object(-3, out self);
@@ -65,12 +50,17 @@ public void csq_wrap_gtk_button(Squirrel.Vm vm)
                 br.clicked.connect(() => {
                     vm.push_object(callback);
                     vm.push_object(self);
-                    vm.call(1, true, true);
+                    run_callback(vm, 1, signal_name);
                 });
             break;
             default:
                 return vm.throw_error("no such signal: " + signal_name);
         }
+
+        vm.push_string("__callbacks");
+        vm.get(1);
+        vm.push_object(callback);
+        vm.array_append(-2);
 
         return 0; // no values returned
     }, 0);
@@ -78,7 +68,7 @@ public void csq_wrap_gtk_button(Squirrel.Vm vm)
 
     vm.push_string("set_label");
     vm.new_closure((vm) => {
-        ButtonWrap br = vm.get_instance(1) as ButtonWrap;
+        var br = vm.get_instance(1) as Gtk.Button;
         string label = "";
         vm.get_string(2, out label);
         br.set_label(label);
@@ -88,3 +78,7 @@ public void csq_wrap_gtk_button(Squirrel.Vm vm)
 
     vm.new_slot(-3, false);
 }
+
+
+}
+
