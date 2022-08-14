@@ -1,4 +1,6 @@
 
+public delegate void RequirePluginFunction (Squirrel.Vm vm);
+
 void csq_wrap_module(Squirrel.Vm vm)
 {
     vm.push_string("require");

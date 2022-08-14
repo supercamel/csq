@@ -3,6 +3,7 @@
 ###############################################################################
 
 project('native_csq_module', 'vala', 'c')
+library_name = 'native_module'
 description = 'A Native CSQ Module'
 
 dependencies = [
@@ -23,7 +24,7 @@ sources = files(
 
 add_global_arguments(['-fPIC'], language: 'c')
 
-lib = shared_library('native_module', sources,
+lib = shared_library(library_name, sources,
   dependencies: dependencies,
   install: false)
 
