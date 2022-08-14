@@ -1,4 +1,6 @@
 
+public delegate void RequirePluginFunction (Squirrel.Vm vm);
+
 class csqApp : Application
 {
     private csqApp() {
@@ -40,30 +42,87 @@ class csqApp : Application
             print(str);
         });
 
-        vm.push_root_table();
-        csq_wrap_gtk_window(vm);
-        csq_wrap_gtk_box(vm);
-        csq_wrap_gtk_label(vm);
-        csq_wrap_gtk_button(vm);
-        csq_wrap_gtk_entry(vm);
-        csq_wrap_gtk_treeview(vm);
-        csq_wrap_gtk_main(vm);
-        csq_wrap_module(vm);
-
+        string path = args[args.length-1];
         if(args.length < 2) {
             stdout.printf("No script specified\n");
             stdout.printf("Run '%s --help' to see a full list of available command line options.\n", args[0]);
             return 0;
         }
 
-        string path = args[args.length-1];
         File file = File.new_for_path(path);
 	    if (file.query_exists() && file.query_file_type(FileQueryInfoFlags.NONE) == FileType.REGULAR) {
+            vm.push_root_table();
+            csq_wrap_gtk_window(vm);
+            csq_wrap_gtk_box(vm);
+            csq_wrap_gtk_label(vm);
+            csq_wrap_gtk_button(vm);
+            csq_wrap_gtk_entry(vm);
+            csq_wrap_gtk_treeview(vm);
+            csq_wrap_gtk_main(vm);
+
+            loaded_modules = new SList<string>();
+            loaded_modules.append(path);
+
+            vm.push_string("require");
+            vm.new_closure((vm) => {
+                string module_path;
+                vm.get_string(2, out module_path);
+
+                int length = (int)loaded_modules.length();
+                for(var i = 0; i < length; i++) 
+                {
+                    if(loaded_modules.nth_data(i) == module_path) {
+                        return 0;
+                    }
+                }
+
+                File module_file = File.new_for_path(module_path);
+	            if (module_file.query_exists() && module_file.query_file_type(FileQueryInfoFlags.NONE) == FileType.REGULAR) {
+                    if(vm.do_file(module_path, false, true) == false) {
+                        return vm.throw_error("Could not load nut " + module_path);
+                    }
+                    loaded_modules.append(module_path);
+                    return 0;
+	            } else {
+                    string pwdpath = Module.build_path (Environment.get_variable ("PWD"), module_path);
+                    var module = Module.open(pwdpath, ModuleFlags.LAZY);
+                    if(module == null) {
+                        string csqpath = Environment.get_variable("CSQ_PATH");
+                        if(csqpath != null) {
+                            pwdpath = Module.build_path (csqpath, module_path);
+                            module = Module.open(pwdpath, ModuleFlags.LAZY);
+                        }
+
+                        if(module == null) {
+                            string pathpath = Module.build_path(Environment.get_variable("PATH"), module_path);
+                            module = Module.open(pathpath, ModuleFlags.LAZY);
+                            if(module == null) {
+                                return vm.throw_error("Could not load module '" + module_path + "'");
+                            }
+                        }
+                    }
+
+                    void* function;
+                    module.symbol ("csq_require", out function);
+
+                    RequirePluginFunction req = (RequirePluginFunction)function;
+                    stdout.printf("calling require function");
+                    req(vm);
+
+                    loaded_modules.append(module_path);
+                    return 1;
+    	        }
+
+            }, 0);
+            vm.new_slot(-3, false);
+
+
             vm.do_file(path, false, true);
 	    } 
         else {
             stdout.printf("File '%s' not found\n", path);
         }
+
 
 		return 0;
 	}
@@ -85,6 +144,7 @@ class csqApp : Application
     }
 
     private Squirrel.Vm vm;
+    public static SList<string> loaded_modules;
 }
 
 

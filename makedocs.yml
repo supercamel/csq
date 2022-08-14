@@ -1,5 +1,6 @@
 site_name: cqs
 nav:
     - Home: index.md
+    - 'Require': require.md
 
 theme: readthedocs
