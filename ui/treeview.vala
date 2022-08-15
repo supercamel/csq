@@ -1,4 +1,13 @@
 
+/*
+Gtk TreeView is exposed as a couple of different widgets:
+ui.Table and 
+probably something else yet to be determined.
+
+
+ui.Table is a simple table widget that can be used to display a list of items.
+
+*/
 namespace ui 
 {
 

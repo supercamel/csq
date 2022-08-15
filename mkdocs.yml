@@ -2,5 +2,7 @@ site_name: cqs
 nav:
     - Home: index.md
     - 'Require': require.md
+    - 'ui':
+        - 'box': ui/box.md
 
 theme: readthedocs

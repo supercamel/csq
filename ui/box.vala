@@ -47,10 +47,6 @@ private void expose_box(Squirrel.Vm vm)
     vm.push_string("pack_start");
     vm.new_closure((vm) => {
         var top = vm.get_top();
-        if(top < 2) {
-            vm.throw_error("InvalidArgumentCount");
-            return -1;
-        }
         var box = vm.get_instance(1) as Gtk.Box;
         Gtk.Widget* w;
         vm.get_instance_up(2, out w, null, false);
