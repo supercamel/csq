@@ -4,7 +4,9 @@ nav:
     - 'Require': require.md
     - 'ui':
         - 'Box': ui/box.md
+        - 'Button' : ui/button.md
         - 'Label': ui/label.md
+        - 'Table': ui/table.md
         - 'Widget': ui/widget.md
         - 'Window': ui/window.md
 
