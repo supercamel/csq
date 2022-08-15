@@ -11,6 +11,7 @@ namespace ui
             widget.expand = expand; 
             return 0;
         }, 0);
+        vm.set_params_check(-2, "xb");
         vm.new_slot(-3, false);
 
         vm.push_string("set_vexpand");
@@ -21,6 +22,7 @@ namespace ui
             widget.hexpand = expand; 
             return 0;
         }, 0);
+        vm.set_params_check(-2, "xb");
         vm.new_slot(-3, false);
 
         vm.push_string("set_hexpand");
@@ -31,6 +33,7 @@ namespace ui
             widget.vexpand = expand; 
             return 0;
         }, 0);
+        vm.set_params_check(-2, "xb");
         vm.new_slot(-3, false);
 
     }

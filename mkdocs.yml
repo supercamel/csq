@@ -3,6 +3,14 @@ nav:
     - Home: index.md
     - 'Require': require.md
     - 'ui':
-        - 'box': ui/box.md
+        - 'Box': ui/box.md
+        - 'Widget': ui/widget.md
 
 theme: readthedocs
+markdown_extensions:
+  - def_list
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
