@@ -13,7 +13,7 @@ CSQ is a Squirrel language runtime for developing applications using the Squirre
 2. Clone this repository
     
     ```
-    https://github.com/supercamel/csq
+    git clone https://github.com/supercamel/csq
     cd csq
     ```
 
