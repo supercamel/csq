@@ -1,20 +1,32 @@
 # CSQ
 
-CSQ is a Squirrel language runtime for developing applications using the Squirrel scripting language. It comes with 
+CSQ is a Squirrel language runtime for developing applications using the Squirrel scripting language. 
 
-* A GUI API that wraps and polishes up some of the Gtk API. 
-* An API for the file system
-* Some network functions
-* A plugin system that allows CSQ to be extended with native modules using Vala or C
-* Good integration with GObjects
+## Documentation
 
+[ReadTheDocs](https://csq.readthedocs.io)
 
-CSQ intends to be a bit like NodeJS but with a focus on
+## How To Build
 
-* the desktop, as opposed to the web
-* stability. built on a web established foundation of Squirrel and Gtk.
-* Integration with existing libraries though gobject introspection, though this may come at a later time as a girepository module. 
-* obviously, Squirrel rather than Javascript
+1. First build and install the squirrel_gobject library [squirrel_gobject](https://github.com/supercamel/squirrel_gobject)
 
+2. Clone this repository
+    
+    ```
+    https://github.com/supercamel/csq
+    cd csq
+    ```
 
+3. Configure and build 
+
+    ```
+    meson builddir
+    ninja -C builddir
+    ```
+
+4. Try running an example script
+
+    ```
+    builddir/csq examples/hello_world.nut
+    ```
 
