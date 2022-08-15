@@ -23,7 +23,7 @@ ui.main();
 
 ### Inherits
 
-Widget
+[Widget](widget.md)
 
 
 ### Functions 

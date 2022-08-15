@@ -165,6 +165,7 @@ private void expose_window(Squirrel.Vm vm)
         wr.resizable = resizable;
         return 0;
     }, 0);
+    vm.set_params_check(2, "xb");
     vm.new_slot(-3, false);
 
     vm.push_string("set_icon");
@@ -180,6 +181,7 @@ private void expose_window(Squirrel.Vm vm)
         }
         return 0;
     }, 0);
+    vm.set_params_check(2, "xs");
     vm.new_slot(-3, false);
 
     vm.push_string("set_transient_for");
@@ -190,6 +192,7 @@ private void expose_window(Squirrel.Vm vm)
         wr.set_transient_for(parent);
         return 0;
     }, 0);
+    vm.set_params_check(2, "xx");
     vm.new_slot(-3, false);
 
 
@@ -201,6 +204,40 @@ private void expose_window(Squirrel.Vm vm)
         window.add(w);
         return 0;
     }, 0);
+    vm.set_params_check(2, "xx");
+    vm.new_slot(-3, false);
+
+    vm.push_string("get_size");
+    vm.new_closure((vm) => {
+        var window = vm.get_instance(1) as Gtk.Window;
+        int w, h;
+        window.get_size(out w, out h);
+        vm.new_array(0);
+        vm.push_int(w);
+        vm.array_append(-2);
+        vm.push_int(h);
+        vm.array_append(-2);
+        return 1;
+    }, 0);
+    vm.set_params_check(1, "x");
+    vm.new_slot(-3, false);
+
+    vm.push_string("maximize");
+    vm.new_closure((vm) => {
+        var window = vm.get_instance(1) as Gtk.Window;
+        window.maximize();
+        return 0;
+    } , 0);
+    vm.set_params_check(1, "x");
+    vm.new_slot(-3, false);
+
+    vm.push_string("unmaximize");
+    vm.new_closure((vm) => {
+        var window = vm.get_instance(1) as Gtk.Window;
+        window.unmaximize();
+        return 0;
+    }, 0);
+    vm.set_params_check(1, "x");
     vm.new_slot(-3, false);
 
     vm.new_slot(-3, false);

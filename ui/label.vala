@@ -49,6 +49,7 @@ private void expose_label(Squirrel.Vm vm)
         }
         return 0;
     }, 0);
+    vm.set_params_check(2, "xs");
     vm.new_slot(-3, false);
 
     vm.push_string("get_text");
@@ -58,6 +59,7 @@ private void expose_label(Squirrel.Vm vm)
         vm.push_string(text);
         return 1;
     }, 0);
+    vm.set_params_check(1, "x");
     vm.new_slot(-3, false);
 
     vm.push_string("set_use_markup");
@@ -68,6 +70,7 @@ private void expose_label(Squirrel.Vm vm)
         br.set_use_markup(use_markup);
         return 0;
     }, 0);
+    vm.set_params_check(2, "xb");
     vm.new_slot(-3, false);
 
 
@@ -85,6 +88,7 @@ private void expose_label(Squirrel.Vm vm)
         }
         return 0;
     }, 0);
+    vm.set_params_check(2, "xf");
     vm.new_slot(-3, false);
 
     vm.push_string("set_yalign");
@@ -101,6 +105,7 @@ private void expose_label(Squirrel.Vm vm)
         }
         return 0;
     } , 0);
+    vm.set_params_check(2, "xf");
     vm.new_slot(-3, false);
 
     vm.new_slot(-3, false);
