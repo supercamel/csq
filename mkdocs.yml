@@ -5,7 +5,9 @@ nav:
     - 'ui':
         - 'Box': ui/box.md
         - 'Button' : ui/button.md
+        - 'Entry' : ui/entry.md
         - 'Label': ui/label.md
+        - 'MessageBox': ui/messagebox.md
         - 'Table': ui/table.md
         - 'Widget': ui/widget.md
         - 'Window': ui/window.md

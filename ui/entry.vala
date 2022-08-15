@@ -4,6 +4,56 @@ namespace ui
 
 private void expose_entry(Squirrel.Vm vm)
 {
+    vm.push_string("InputPurpose");
+    vm.new_table();
+
+    vm.push_string("ALPHA");
+    vm.push_int(Gtk.InputPurpose.ALPHA);
+    vm.new_slot(-3, true);
+
+    vm.push_string("DIGITS");
+    vm.push_int(Gtk.InputPurpose.DIGITS);
+    vm.new_slot(-3, true);
+
+    vm.push_string("EMAIL");
+    vm.push_int(Gtk.InputPurpose.EMAIL);
+    vm.new_slot(-3, true);
+
+    vm.push_string("FREE_FORM");
+    vm.push_int(Gtk.InputPurpose.FREE_FORM);
+    vm.new_slot(-3, true);
+
+    vm.push_string("NAME");
+    vm.push_int(Gtk.InputPurpose.NAME);
+    vm.new_slot(-3, true);
+
+    vm.push_string("NUMBER");
+    vm.push_int(Gtk.InputPurpose.NUMBER);
+    vm.new_slot(-3, true);
+
+    vm.push_string("PASSWORD");
+    vm.push_int(Gtk.InputPurpose.PASSWORD);
+    vm.new_slot(-3, true);
+
+    vm.push_string("PHONE");
+    vm.push_int(Gtk.InputPurpose.PHONE);
+    vm.new_slot(-3, true);
+
+    vm.push_string("PIN");
+    vm.push_int(Gtk.InputPurpose.PIN);
+    vm.new_slot(-3, true);
+
+    vm.push_string("TERMINAL");
+    vm.push_int(Gtk.InputPurpose.TERMINAL);
+    vm.new_slot(-3, true);
+
+    vm.push_string("URL");
+    vm.push_int(Gtk.InputPurpose.URL);
+    vm.new_slot(-3, true);
+    
+    vm.new_slot(-3, false);
+
+
     vm.push_string("Entry");
     vm.new_class(false);
 
@@ -64,6 +114,7 @@ private void expose_entry(Squirrel.Vm vm)
 
         return 0; // no values returned 
     }, 0);
+    vm.set_params_check(3, "xsf");
     vm.new_slot(-3, false);
 
     vm.push_string("set_text");
@@ -74,6 +125,7 @@ private void expose_entry(Squirrel.Vm vm)
         br.set_text(text);
         return 0;
     }, 0);
+    vm.set_params_check(2, "xs");
     vm.new_slot(-3, false);
 
     vm.push_string("get_text");
@@ -82,8 +134,20 @@ private void expose_entry(Squirrel.Vm vm)
         vm.push_string(br.get_text());
         return 1;
     }, 0);
+    vm.set_params_check(1, "x");
     vm.new_slot(-3, false);
 
+
+    vm.push_string("set_input_purpose");
+    vm.new_closure((vm) => {
+        var br = vm.get_instance(1) as Gtk.Entry;
+        long purpose = 0;
+        vm.get_int(2, out purpose);
+        br.set_input_purpose((Gtk.InputPurpose)purpose);
+        return 0;
+    } , 0);
+    vm.set_params_check(2, "xi");
+    vm.new_slot(-3, false);
 
     vm.new_slot(-3, false);
 }

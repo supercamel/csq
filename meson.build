@@ -22,7 +22,8 @@ source = files(
   'ui/entry.vala',
   'ui/treeview.vala',
   'ui/main_loop.vala',
-  'ui/widget.vala'
+  'ui/widget.vala',
+  'ui/messagebox.vala'
   )
 
 executable('csq', source, dependencies: dependencies)

@@ -15,6 +15,7 @@ void init(Squirrel.Vm vm)
     expose_button(vm);
     expose_entry(vm);
     expose_treeview(vm);
+    expose_messagebox(vm);
     expose_main(vm);
 
     vm.new_slot(-3, false);
