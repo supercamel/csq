@@ -5,6 +5,7 @@ nav:
     - 'ui':
         - 'Box': ui/box.md
         - 'Widget': ui/widget.md
+        - 'Window': ui/window.md
 
 theme: readthedocs
 markdown_extensions:

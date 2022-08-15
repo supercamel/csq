@@ -95,12 +95,33 @@ private void expose_window(Squirrel.Vm vm)
     }, 0);
     vm.new_slot(-3, false);
 
+
+    vm.push_string("unfullscreen");
+    vm.new_closure((vm) => {
+        var window = vm.get_instance(1) as Gtk.Window;
+        window.unfullscreen();
+        return 0;
+    }, 0);
+    vm.new_slot(-3, false);
+
     vm.push_string("deiconify");
     vm.new_closure((vm) => {
         var window = vm.get_instance(1) as Gtk.Window;
         window.deiconify();
         return 0;
     }, 0);
+    vm.new_slot(-3, false);
+
+    vm.push_string("set_default_size");
+    vm.new_closure((vm) => {
+        var window = vm.get_instance(1) as Gtk.Window;
+        long width, height;
+        vm.get_int(-2, out width);
+        vm.get_int(-1, out height);
+        window.set_default_size((int)width, (int)height);
+        return 0;
+    } , 0);
+    vm.set_params_check(3, "xii");
     vm.new_slot(-3, false);
 
     vm.push_string("get_default_size");
@@ -125,6 +146,7 @@ private void expose_window(Squirrel.Vm vm)
         wr.decorated = decorated;
         return 0;
     } , 0);
+    vm.set_params_check(2, "xb");
     vm.new_slot(-3, false);
 
     vm.push_string("get_decorated");
