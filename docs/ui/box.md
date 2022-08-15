@@ -53,18 +53,22 @@ Adds a widget to the box and inserts it at the start.
 ### Parameters
 
 `widget` 
-:   Type: ==a widget instance==
+
+:   Type: == a widget instance ==
     an instance of a widget to add to the box
 
 `expand`
-:   Type: ==boolean==
+
+:   Type: == boolean ==
     if true, the child widget is given extra space to use available space
 
 `fill`
-:   Type: ==boolean==
+
+:   Type: == boolean ==
     if true, the child widget will fill the extra space. if false, the extra space is used as padding. has no effect if expand is false.
 
 `spacing`
-:   Type: ==number==
+
+:   Type: == number ==
     extra space in pixels to put between this child and its neighbours
 
