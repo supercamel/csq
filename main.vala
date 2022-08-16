@@ -54,6 +54,7 @@ class csqApp : Application
             vm.push_root_table();
             
             ui.init(vm);
+            expose_sleep(vm);
 
             loaded_modules = new SList<string>();
             loaded_modules.append(path);

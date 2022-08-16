@@ -5,7 +5,7 @@ window.connect("destroy", ui.main_quit);
 
 local box = ui.Box(ui.Orientation.VERTICAL, 5);
 local lbl = ui.Label("Hello world!");
-lbl.set_xalign(0);
+lbl.set_xalign(0.0);
 
 box.pack_start(lbl);
 box.pack_start(ui.Label("testing"));

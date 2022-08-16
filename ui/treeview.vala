@@ -55,7 +55,7 @@ private void expose_treeview(Squirrel.Vm vm)
         });
         return 1;
     }, 0);
-    vm.set_params_check(0, "a");
+    vm.set_params_check(0, "xa");
     vm.new_slot(-3, false);
 
     vm.push_string("connect");
