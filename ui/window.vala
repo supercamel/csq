@@ -32,7 +32,6 @@ private void expose_window(Squirrel.Vm vm)
         string signal_name;
         vm.get_string(-2, out signal_name); // signal name is passed as the 'second last' parameter
 
-
         Squirrel.Obj callback;
         vm.get_stack_object(-1, out callback); //get the callback closure as a Squirrel Object
 
@@ -42,9 +41,15 @@ private void expose_window(Squirrel.Vm vm)
         switch(signal_name) {
             case "destroy":
                 gg.destroy.connect(() => {
-                    vm.push_object(callback);
-                    vm.push_object(self);
-                    run_callback(vm, 1, signal_name);
+                    Squirrel.Vm thread;
+
+                    vm.new_thread(256);
+                    vm.get_thread(-1, out thread);
+
+
+                    thread.push_object(callback);
+                    thread.push_object(self);
+                    run_callback(thread, 1, signal_name);
                 });
             break;
             default:

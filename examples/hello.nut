@@ -3,14 +3,21 @@ window.show_all();
 window.set_title("Hello World");
 window.connect("destroy", ui.main_quit);
 
+print("here\n");
+
 local box = ui.Box(ui.Orientation.VERTICAL, 5);
 local lbl = ui.Label("Hello world!");
-lbl.set_xalign(0);
+lbl.set_xalign(0.0);
+
+print("here\n");
 
 box.pack_start(lbl);
 box.pack_start(ui.Label("testing"));
 local btn = ui.Button("Click me!");
 local entry = ui.Entry("Enter your name");
+
+print("connecting button\n");
+
 
 btn.connect("clicked", function() {
     print(entry.get_text());

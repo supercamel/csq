@@ -84,7 +84,7 @@ No return value
 
 ## get_row
 
-Gets a values of a row
+Gets row data from the table as an array of strings. 
 
 ### Definition
 

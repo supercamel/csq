@@ -38,10 +38,6 @@ class csqApp : Application
 
         vm = new Squirrel.Vm(1024);
 
-        vm.on_print.connect((vm, str) => {
-            print(str);
-        });
-
         string path = args[args.length-1];
         if(args.length < 2) {
             stdout.printf("No script specified\n");
@@ -54,6 +50,7 @@ class csqApp : Application
             vm.push_root_table();
             
             ui.init(vm);
+            expose_sleep(vm);
 
             loaded_modules = new SList<string>();
             loaded_modules.append(path);

@@ -6,6 +6,18 @@ A message box to display messages, warnings and information to the user.
 
 This is a wrapper around Gtk.MessageDialog. The instance user pointer is a Gtk.MessageDialog.
 
+```
+    local msgbox = ui.MessageBox(window, ui.MessageType.ERROR);
+    msgbox.set_text("Hello!");
+    msgbox.set_secondary_text("secondary text");
+    msgbox.add_response("OK", 1);
+    msgbox.add_response("Cancel", 2);
+    local response = msgbox.run();
+
+    print(response.tostring());
+    print("\n");
+```
+
 ### Functions
 
 * [constructor(ui.Window parent, ui.MessageType type)](#constructor)
