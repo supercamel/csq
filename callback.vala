@@ -30,7 +30,6 @@ void expose_sleep(Squirrel.Vm vm)
         vm.get_int(-1, out count_ms);
 
         GLib.Timeout.add((uint)count_ms, () => {
-            print("timeout\n");
             vm.push_null();
             thread_queue.append(vm);
             GLib.Idle.add(wake_up_threads);

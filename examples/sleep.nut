@@ -1,5 +1,4 @@
 
-
 function my_thread()
 {
     print("thread starting\n");

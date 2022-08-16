@@ -9,8 +9,6 @@ local box = ui.Box(ui.Orientation.VERTICAL, 5);
 local lbl = ui.Label("Hello world!");
 lbl.set_xalign(0.0);
 
-print("here\n");
-
 box.pack_start(lbl);
 box.pack_start(ui.Label("testing"));
 local btn = ui.Button("Click me!");
