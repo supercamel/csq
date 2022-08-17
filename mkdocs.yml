@@ -2,7 +2,7 @@ site_name: cqs
 nav:
     - Home: index.md
     - 'Require': require.md
-    - 'Async & Threads': async.md
+    - 'Async': async.md
     - 'ui':
         - 'Box': ui/box.md
         - 'Button' : ui/button.md
@@ -12,7 +12,7 @@ nav:
         - 'Table': ui/table.md
         - 'Widget': ui/widget.md
         - 'Window': ui/window.md
-    - 'Web': /web.md
+    - 'Web': web.md
 
 theme: readthedocs
 markdown_extensions:
