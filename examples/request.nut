@@ -1,7 +1,8 @@
 
+
 function getpage() {
-    local result = web.request_thread("http://www.google.com");
-    print(result);
+    local result = web.get_async("http://www.google.com");
+    print(result.uri);
     ui.main_quit();
 }
 

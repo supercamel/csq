@@ -4,21 +4,37 @@ GLib.List<Squirrel.Vm> thread_queue;
 
 class SuspendedCoroutineGuard : Object
 {
-    public SuspendedCoroutineGuard(uint handle)
+    public SuspendedCoroutineGuard(Squirrel.Vm v)
     {
-        wakeup_handle = handle;
+        vm = v;
+        killed = false;
+
+        vm.set_foreign_pointer(this);
+
+        vm.set_vm_release_hook((ptr, sz) => {
+            var sus = ptr as SuspendedCoroutineGuard;
+            sus.killed = true;
+            return Squirrel.OK;
+        });
     }
 
-    public void release_handle()
-    {
-        GLib.Source.remove(wakeup_handle);
+    public bool wake_up() {
+        if(killed) {
+            return false;
+        }
+        else {
+            vm.set_vm_release_hook((ptr, sz) => { 
+                return Squirrel.OK;
+            });
+
+            thread_queue.append(vm);
+            GLib.Idle.add(wake_up_threads);
+            return true;
+        }
     }
 
-    ~SuspendedCoroutineGuard()
-    {
-    }
-
-    public uint wakeup_handle;
+    Squirrel.Vm vm;
+    bool killed;
 }
 
 
@@ -39,47 +55,25 @@ bool wake_up_threads()
     return false;
 }
 
-void release_foreign_pointer(Squirrel.Vm vm)
-{
-    var foreign_ptr = vm.get_foreign_pointer();
-    if(foreign_ptr != null) {
-        var fptr = foreign_ptr as GLib.Object;
-        fptr.unref();
-    }
-}
 
 void expose_sleep(Squirrel.Vm vm)
 {
     thread_queue = new GLib.List<Squirrel.Vm>();
 
     vm.push_root_table();
-    vm.push_string("sleep_thread");
+    vm.push_string("sleep_async");
     vm.new_closure((vm) => {
         long count_ms;
         vm.get_int(-1, out count_ms);
 
-        uint src = GLib.Timeout.add((uint)count_ms, () => {
-            vm.push_null();
-            thread_queue.append(vm);
-            vm.set_vm_release_hook((ptr, sz) => {
-                var sus = ptr as SuspendedCoroutineGuard;
-                sus.unref();
-                return Squirrel.OK;
-            });
-            GLib.Idle.add(wake_up_threads);
+
+        var scr = new SuspendedCoroutineGuard(vm);
+
+        GLib.Timeout.add((uint)count_ms, () => {
+            if(scr.wake_up()) {
+                vm.push_null();
+            }
             return false;
-        });
-
-        release_foreign_pointer(vm);
-        var scr = new SuspendedCoroutineGuard(src);
-        vm.set_foreign_pointer(scr);
-        scr.ref();
-
-        vm.set_vm_release_hook((ptr, sz) => {
-            var sus = ptr as SuspendedCoroutineGuard;
-            sus.release_handle();
-            sus.unref();
-            return Squirrel.OK;
         });
 
         return vm.suspend();
@@ -94,9 +88,9 @@ void expose_sleep(Squirrel.Vm vm)
         vm.get_int(-2, out count_ms);
 
         Squirrel.Obj callback;
-        vm.get_stack_object(-1, out callback); //get the callback closure as a Squirrel Object
+        vm.get_stack_object(-1, out callback); 
 
-        Squirrel.Obj self; // keep a copy of the class instance
+        Squirrel.Obj self;
         vm.get_stack_object(-3, out self);
 
         GLib.Timeout.add((uint)count_ms, () => {
