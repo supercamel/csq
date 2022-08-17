@@ -96,14 +96,10 @@ private void expose_entry(Squirrel.Vm vm)
         switch(signal_name) {
             case "preedit-changed":
                 br.preedit_changed.connect((preedit) => {
-                    Squirrel.Vm thread;
-                    vm.new_thread(256);
-                    vm.get_thread(-1, out thread);
-
-                    thread.push_object(callback);
-                    thread.push_object(self);
-                    thread.push_string(preedit);
-                    run_callback(thread, 2, signal_name);
+                    vm.push_object(callback);
+                    vm.push_object(self);
+                    vm.push_string(preedit);
+                    run_callback(vm, 2, signal_name);
                 });
             break;
             default:

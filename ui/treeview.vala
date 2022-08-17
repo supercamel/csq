@@ -74,30 +74,25 @@ private void expose_treeview(Squirrel.Vm vm)
         switch(signal_name) {
             case "row-clicked":
                 br.row_activated.connect((path, column) => {
-                    Squirrel.Vm thread;
-
-                    vm.new_thread(256);
-                    vm.get_thread(-1, out thread);
-
-                    thread.push_object(callback);
-                    thread.push_object(self);
-                    thread.push_int(int.parse(path.to_string()));
+                    vm.push_object(callback);
+                    vm.push_object(self);
+                    vm.push_int(int.parse(path.to_string()));
 
                     var model = br.get_model() as Gtk.ListStore;
                     Gtk.TreeIter iter;
                     model.get_iter(out iter, path);
 
-                    thread.new_array(0);
+                    vm.new_array(0);
                     int n_columns = model.get_n_columns();
                     for(int i = 0; i < n_columns; i++) {
                         var val = GLib.Value(typeof(string));
                         model.get_value(iter, i, out val);
 
-                        thread.push_string(val.get_string());
-                        thread.array_append(-2);
+                        vm.push_string(val.get_string());
+                        vm.array_append(-2);
                     }
 
-                    run_callback(thread, 3, signal_name);
+                    run_callback(vm, 3, signal_name);
                 });
             break;
             default:

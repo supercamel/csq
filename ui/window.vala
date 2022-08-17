@@ -41,15 +41,9 @@ private void expose_window(Squirrel.Vm vm)
         switch(signal_name) {
             case "destroy":
                 gg.destroy.connect(() => {
-                    Squirrel.Vm thread;
-
-                    vm.new_thread(256);
-                    vm.get_thread(-1, out thread);
-
-
-                    thread.push_object(callback);
-                    thread.push_object(self);
-                    run_callback(thread, 1, signal_name);
+                    vm.push_object(callback);
+                    vm.push_object(self);
+                    run_callback(vm, 1, signal_name);
                 });
             break;
             default:

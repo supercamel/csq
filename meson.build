@@ -5,6 +5,7 @@ dependencies = [
   dependency('gobject-2.0'),
   dependency('libsquirrel3'),
   dependency('gmodule-2.0'),
+  dependency('libsoup-2.4'),
   dependency('gtk+-3.0'),
   meson.get_compiler('c').find_library('m', required: false)
   ]
@@ -23,7 +24,8 @@ source = files(
   'ui/treeview.vala',
   'ui/main_loop.vala',
   'ui/widget.vala',
-  'ui/messagebox.vala'
+  'ui/messagebox.vala',
+  'web/request.vala'
   )
 
 executable('csq', source, dependencies: dependencies)
