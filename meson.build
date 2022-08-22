@@ -1,4 +1,4 @@
-project('camsq', 'vala')
+project('camsq', 'vala', 'cpp')
 
 dependencies = [
   dependency('glib-2.0'),
@@ -9,6 +9,8 @@ dependencies = [
   dependency('gtk+-3.0'),
   meson.get_compiler('c').find_library('m', required: false)
   ]
+
+incdir = include_directories('json')
 
 source = files(
   'main.vala',
@@ -25,8 +27,10 @@ source = files(
   'ui/main_loop.vala',
   'ui/widget.vala',
   'ui/messagebox.vala',
-  'web/request.vala'
+  'web/request.vala',
+  'json/json.vapi',
+  'json/json.cpp'
   )
 
-executable('csq', source, dependencies: dependencies)
+executable('csq', source, include_directories: incdir, dependencies: dependencies)
 

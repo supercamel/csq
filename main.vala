@@ -52,6 +52,7 @@ class csqApp : Application
             ui.init(vm);
             web.init(vm);
             expose_sleep(vm);
+            expose_json(vm);
 
             loaded_modules = new SList<string>();
             loaded_modules.append(path);
