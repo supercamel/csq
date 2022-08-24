@@ -3,6 +3,8 @@
 #include <vector>
 using namespace std;
 
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
 #include "rapidjson/reader.h"
 #include "json.h"
 
@@ -141,9 +143,11 @@ glong json_stringify(SquirrelVm* vm)
                 stringstream ss;
                 ss << "{";
                 squirrel_vm_push_null(vm);
+
                 int count = 0;
                 while(SQ_SUCCEEDED(squirrel_vm_next(vm,-2)))
                 {
+
                     if(count++ > 0) {
                         ss << ",";
                     }
@@ -159,45 +163,70 @@ glong json_stringify(SquirrelVm* vm)
                     squirrel_vm_get_string(vm, -1, &val);
                     ss << val;
                     squirrel_vm_pop(vm, 2);
+
                 }
                 ss << "}";
-                squirrel_vm_pop(vm,1); 
+                squirrel_vm_pop(vm,2); 
 
                 squirrel_vm_push_string(vm, ss.str().c_str());
             }
             break;
         case SQUIRREL_OBJECTTYPE_ARRAY:
-        {
-            int sz = squirrel_vm_get_size(vm, -1);
-            stringstream ss;
-            ss << "[";
-            int count = 0;
-            for(int i = 0; i < sz; i++) {
-                if(i > 0) {
-                    ss << ",";
+            {
+                int sz = squirrel_vm_get_size(vm, -1);
+                stringstream ss;
+                ss << "[";
+                int count = 0;
+                for(int i = 0; i < sz; i++) {
+                    if(i > 0) {
+                        ss << ",";
+                    }
+
+                    squirrel_vm_push_int(vm, i);
+                    squirrel_vm_get(vm, -2);
+
+                    json_stringify(vm);
+
+                    gchar* val;
+                    squirrel_vm_get_string(vm, -1, &val);
+                    ss << val;
+
+                    squirrel_vm_pop(vm, 2);
                 }
+                ss << "]";
 
-                squirrel_vm_push_int(vm, i);
-                squirrel_vm_get(vm, -2);
-
-                json_stringify(vm);
-
-                gchar* val;
-                squirrel_vm_get_string(vm, -1, &val);
-                ss << val;
-
-                squirrel_vm_pop(vm, 2);
+                squirrel_vm_pop(vm, 1);
+                squirrel_vm_push_string(vm, ss.str().c_str());
             }
-            ss << "]";
+            break;
+        case SQUIRREL_OBJECTTYPE_STRING:
+            {
+                stringstream ss;
 
-            squirrel_vm_push_string(vm, ss.str().c_str());
-        }
-        break;
+                gchar* str;
+                squirrel_vm_get_string(vm, -1, &str);
+
+                rapidjson::StringBuffer sb;
+                rapidjson::Writer<StringBuffer> writer(sb); // edited
+                writer.String(str);
+
+                squirrel_vm_pop(vm, 1);
+
+                squirrel_vm_push_string(vm, sb.GetString());
+            }
+            break;
         case SQUIRREL_OBJECTTYPE_NULL:
             squirrel_vm_push_string(vm, "null");
             break;
         default:
-            squirrel_vm_to_string(vm, -1);
+            {
+                squirrel_vm_to_string(vm, -1);
+                gchar* str;
+                squirrel_vm_get_string(vm, -1, &str);
+                gchar* str_copy = g_strdup(str);
+                squirrel_vm_pop(vm, 2);
+                squirrel_vm_push_string(vm, str_copy);
+            }
     }
     return 1;
 }

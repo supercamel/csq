@@ -6,6 +6,7 @@ dependencies = [
   dependency('libsquirrel3'),
   dependency('gmodule-2.0'),
   dependency('libsoup-2.4'),
+  dependency('spino-1.0'),
   dependency('gtk+-3.0'),
   meson.get_compiler('c').find_library('m', required: false)
   ]
@@ -28,6 +29,7 @@ source = files(
   'ui/widget.vala',
   'ui/messagebox.vala',
   'web/request.vala',
+  'web/spino.vala',
   'json/json.vapi',
   'json/json.cpp'
   )
