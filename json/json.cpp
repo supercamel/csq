@@ -135,6 +135,7 @@ glong json_parse(SquirrelVm* vm)
 
 glong json_stringify(SquirrelVm* vm)
 {
+    cout << "stringify start" << endl;
     switch(squirrel_vm_get_object_type(vm, -1))
     {
         case SQUIRREL_OBJECTTYPE_TABLE:
@@ -176,26 +177,27 @@ glong json_stringify(SquirrelVm* vm)
                 int sz = squirrel_vm_get_size(vm, -1);
                 stringstream ss;
                 ss << "[";
+
+                squirrel_vm_push_null(vm);
                 int count = 0;
-                for(int i = 0; i < sz; i++) {
-                    if(i > 0) {
+                while(SQ_SUCCEEDED(squirrel_vm_next(vm,-2)))
+                {
+
+                    if(count++ > 0) {
                         ss << ",";
                     }
-
-                    squirrel_vm_push_int(vm, i);
-                    squirrel_vm_get(vm, -2);
 
                     json_stringify(vm);
 
                     gchar* val;
                     squirrel_vm_get_string(vm, -1, &val);
                     ss << val;
-
                     squirrel_vm_pop(vm, 2);
+
                 }
                 ss << "]";
 
-                squirrel_vm_pop(vm, 1);
+                squirrel_vm_pop(vm, 2);
                 squirrel_vm_push_string(vm, ss.str().c_str());
             }
             break;
@@ -217,6 +219,10 @@ glong json_stringify(SquirrelVm* vm)
             break;
         case SQUIRREL_OBJECTTYPE_NULL:
             squirrel_vm_push_string(vm, "null");
+            break;
+        case SQUIRREL_OBJECTTYPE_CLOSURE:
+        case SQUIRREL_OBJECTTYPE_NATIVECLOSURE:
+            squirrel_vm_push_string(vm, "function");
             break;
         default:
             {
