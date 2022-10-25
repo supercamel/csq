@@ -20,6 +20,20 @@ class SuspendedCoroutineGuard : Object
         });
     }
 
+    ~SuspendedCoroutineGuard() {
+        if (!killed) {
+            vm.set_vm_release_hook(null);
+            vm.set_foreign_pointer(null);
+            vm.get_last_error();
+            if(vm.get_object_type(-1) == Squirrel.OBJECTTYPE.NULL) {
+                vm.pop(1);
+                vm.wake_up(true, false, true, false);
+            } else {
+                vm.wake_up(true, false, true, true);
+            }
+        }
+    }
+
     public bool wake_up() {
         if(killed) {
             return false;

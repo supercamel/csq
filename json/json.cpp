@@ -118,6 +118,7 @@ glong json_parse(SquirrelVm* vm)
 
 glong json_stringify(SquirrelVm* vm)
 {
+    cout << "stringify start" << endl;
     switch(squirrel_vm_get_object_type(vm, -1))
     {
         case SQUIRREL_OBJECTTYPE_TABLE:
