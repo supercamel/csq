@@ -1,5 +1,5 @@
 
-GLib.List<Squirrel.Vm> thread_queue;
+GLib.List<SuspendedCoroutineGuard> thread_queue;
 
 
 class SuspendedCoroutineGuard : Object
@@ -12,6 +12,8 @@ class SuspendedCoroutineGuard : Object
         vm.set_foreign_pointer(this);
 
         vm.set_vm_release_hook((ptr, sz) => {
+            stdout.printf("release hook called\n");
+            stdout.flush();
             var sus = ptr as SuspendedCoroutineGuard;
             sus.killed = true;
             return Squirrel.OK;
@@ -27,29 +29,31 @@ class SuspendedCoroutineGuard : Object
                 return Squirrel.OK;
             });
 
-            thread_queue.append(vm);
+            thread_queue.append(this);
             GLib.Idle.add(wake_up_threads);
             return true;
         }
     }
 
-    Squirrel.Vm vm;
-    bool killed;
+    public Squirrel.Vm vm;
+    public bool killed;
 }
 
 
 bool wake_up_threads() 
 {
-    var list_copy = new GLib.List<Squirrel.Vm>();
+    var list_copy = new GLib.List<SuspendedCoroutineGuard>();
 
-    thread_queue.foreach((vm) => {
-        list_copy.append(vm);
+    thread_queue.foreach((scg) => {
+        list_copy.append(scg);
     });
 
-    thread_queue = new GLib.List<Squirrel.Vm>();
+    thread_queue = new GLib.List<SuspendedCoroutineGuard>();
 
-    list_copy.foreach((vm) => {
-        vm.wake_up(true, false, true, false);
+    list_copy.foreach((scg) => {
+        if(scg.killed == false) {
+            scg.vm.wake_up(true, false, true, false);
+        }
     });
 
     return false;
@@ -58,7 +62,7 @@ bool wake_up_threads()
 
 void expose_sleep(Squirrel.Vm vm)
 {
-    thread_queue = new GLib.List<Squirrel.Vm>();
+    thread_queue = new GLib.List<SuspendedCoroutineGuard>();
 
     vm.push_root_table();
     vm.push_string("sleep_async");
@@ -89,17 +93,25 @@ void expose_sleep(Squirrel.Vm vm)
 
         Squirrel.Obj callback;
         vm.get_stack_object(-1, out callback); 
+        vm.add_ref(callback);
 
         Squirrel.Obj self;
         vm.get_stack_object(-3, out self);
+        vm.add_ref(self);
 
         GLib.Timeout.add((uint)count_ms, () => {
+            var top = vm.get_top();
             vm.push_object(callback);
             vm.push_object(self);
             run_callback(vm, 1, "timeout");
 
             bool result;
             vm.get_bool(-1, out result);
+            if(result == false) {
+                vm.release(callback);
+                vm.release(self);
+            }
+            vm.set_top(top);
             return result;
         });
         return 1;

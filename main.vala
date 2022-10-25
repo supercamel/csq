@@ -36,7 +36,7 @@ class csqApp : Application
 			return 0;
 		}
 
-        vm = new Squirrel.Vm(1024);
+        vm = new Squirrel.Vm(1024*64);
 
         string path = args[args.length-1];
         if(args.length < 2) {
@@ -80,6 +80,7 @@ class csqApp : Application
 	            } else {
                     string pwdpath = Module.build_path (Environment.get_variable ("PWD"), module_path);
                     var module = Module.open(pwdpath, ModuleFlags.LAZY);
+                    module.make_resident();
                     if(module == null) {
                         string csqpath = Environment.get_variable("CSQ_PATH");
                         if(csqpath != null) {

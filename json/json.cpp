@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <vector>
 using namespace std;
@@ -6,6 +7,7 @@ using namespace std;
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/reader.h"
+#include "rapidjson/filereadstream.h"
 #include "json.h"
 
 using namespace rapidjson;
@@ -16,62 +18,53 @@ struct MyHandler : public BaseReaderHandler<UTF8<>, MyHandler> {
     bool Null() 
     { 
         squirrel_vm_push_null(vm);
-        push_element();
         return true; 
     }
 
     bool Bool(bool b) 
     { 
         squirrel_vm_push_bool(vm, b);
-        push_element();
         return true; 
     }
 
     bool Int(int i) 
     { 
         squirrel_vm_push_int(vm, i);
-        push_element();
         return true; 
     }
 
     bool Uint(unsigned u) 
     { 
         squirrel_vm_push_int(vm, u);
-        push_element();
         return true; 
     }
 
     bool Int64(int64_t i) 
     { 
         squirrel_vm_push_int(vm, i);
-        push_element();
         return true; 
     }
 
     bool Uint64(uint64_t u) 
     { 
         squirrel_vm_push_int(vm, u);
-        push_element();
         return true; 
     }
 
     bool Double(double d) 
     { 
         squirrel_vm_push_float(vm, d);
-        push_element();
         return true; 
     }
 
     bool String(const char* str, SizeType length, bool copy) 
     { 
         squirrel_vm_push_string(vm, str);
-        push_element();
         return true;
     }
 
     bool StartObject() 
     { 
-        depth_stack.push_back(-3);
         squirrel_vm_new_table(vm);
         return true; 
     }
@@ -84,9 +77,9 @@ struct MyHandler : public BaseReaderHandler<UTF8<>, MyHandler> {
 
     bool EndObject(SizeType memberCount) 
     { 
-        depth_stack.pop_back();
-        if(depth_stack.size() > 1) {
-            push_element();
+        for(SizeType i = 0; i < memberCount; i++) {
+            int obj_pos = (memberCount - i) * 2 + 1;
+            squirrel_vm_new_slot(vm, -obj_pos, false);
         }
         return true; 
     }
@@ -94,29 +87,19 @@ struct MyHandler : public BaseReaderHandler<UTF8<>, MyHandler> {
     bool StartArray() 
     { 
         squirrel_vm_new_array(vm, 0);
-        depth_stack.push_back(-2);
         return true; 
     }
 
     bool EndArray(SizeType elementCount) 
     { 
-        depth_stack.pop_back();
-        push_element();
+        for(SizeType i = 0; i < elementCount; i++) {
+            int arr_pos = (elementCount - i) + 1;
+            squirrel_vm_array_append(vm, -arr_pos);
+        }
         return true; 
     }
 
-    void push_element()
-    {
-        if(depth_stack.back() == -2) {
-            squirrel_vm_array_append(vm, depth_stack.back());
-        }
-        else if(depth_stack.back() == -3) {
-            squirrel_vm_new_slot(vm, depth_stack.back(), false);
-        }
-    }
-
     SquirrelVm* vm;
-    std::vector<int> depth_stack;
 };
 
 glong json_parse(SquirrelVm* vm)
@@ -173,29 +156,26 @@ glong json_stringify(SquirrelVm* vm)
             break;
         case SQUIRREL_OBJECTTYPE_ARRAY:
             {
-                int sz = squirrel_vm_get_size(vm, -1);
                 stringstream ss;
+                int counter = 0;
                 ss << "[";
-                int count = 0;
-                for(int i = 0; i < sz; i++) {
-                    if(i > 0) {
+                squirrel_vm_push_null(vm);  //null iterator
+                while(SQ_SUCCEEDED(squirrel_vm_next(vm,-2)))
+                {
+                    if(counter > 0) {
                         ss << ",";
                     }
-
-                    squirrel_vm_push_int(vm, i);
-                    squirrel_vm_get(vm, -2);
-
-                    json_stringify(vm);
-
                     gchar* val;
+                    json_stringify(vm);
                     squirrel_vm_get_string(vm, -1, &val);
                     ss << val;
 
-                    squirrel_vm_pop(vm, 2);
+                    counter++;
+                    squirrel_vm_pop(vm, 2); //pops key and val before the nex iteration
                 }
-                ss << "]";
 
-                squirrel_vm_pop(vm, 1);
+                squirrel_vm_pop(vm, 2); //pops the null iterator and the array
+                ss << "]";
                 squirrel_vm_push_string(vm, ss.str().c_str());
             }
             break;
@@ -218,6 +198,10 @@ glong json_stringify(SquirrelVm* vm)
         case SQUIRREL_OBJECTTYPE_NULL:
             squirrel_vm_push_string(vm, "null");
             break;
+        case SQUIRREL_OBJECTTYPE_CLOSURE:
+        case SQUIRREL_OBJECTTYPE_NATIVECLOSURE:
+            squirrel_vm_push_string(vm, "function");
+        break;
         default:
             {
                 squirrel_vm_to_string(vm, -1);
@@ -231,6 +215,31 @@ glong json_stringify(SquirrelVm* vm)
     return 1;
 }
 
+glong json_parse_file(SquirrelVm* vm) 
+{
+    gchar* filename;
+    squirrel_vm_get_string(vm, -1, &filename);
+    FILE* fp = fopen(filename, "rb"); // non-Windows use "r"
+    if(fp == NULL) {
+        return squirrel_vm_throw_error(vm, "Error opening file");
+    }
+ 
+    char readBuffer[4096];
+    MyHandler handler;
+    handler.vm = vm;
+    Reader reader;
+    FileReadStream is(fp, readBuffer, sizeof(readBuffer));
+    if(reader.Parse(is, handler) != kParseErrorNone) {
+        cout << "Error offset: " << reader.GetErrorOffset() << endl;
+        auto code = reader.GetParseErrorCode();
+        // convert code to a meaningful message
+        cout << "Error parsing json string: " << code << endl;
+        fclose(fp);
+        return squirrel_vm_throw_error(vm, "Error parsing json string");
+    }
+    fclose(fp);
+    return 1;
+}
 
 void expose_json(SquirrelVm* vm)
 {
@@ -245,6 +254,11 @@ void expose_json(SquirrelVm* vm)
     squirrel_vm_push_string(vm, "stringify");
     squirrel_vm_new_closure(vm, json_stringify, 0);
     squirrel_vm_set_params_check(vm, 2, "..");
+    squirrel_vm_new_slot(vm, -3, FALSE);
+
+    squirrel_vm_push_string(vm, "parse_file");
+    squirrel_vm_new_closure(vm, json_parse_file, 0);
+    squirrel_vm_set_params_check(vm, 2, ".s");
     squirrel_vm_new_slot(vm, -3, FALSE);
 
     squirrel_vm_new_slot(vm, -3, FALSE);

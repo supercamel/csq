@@ -16,7 +16,11 @@ void init(Squirrel.Vm vm)
     expose_entry(vm);
     expose_treeview(vm);
     expose_messagebox(vm);
+    expose_menu(vm);
     expose_main(vm);
+    expose_cairo_context(vm);
+    expose_drawing_area(vm);
+    expose_file_chooser(vm);
 
     vm.new_slot(-3, false);
     vm.pop(1);
