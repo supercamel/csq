@@ -18,6 +18,9 @@ private void expose_box(Squirrel.Vm vm)
     vm.push_string("Box");
     vm.new_class(false);
 
+    expose_object_base(vm);
+    expose_widget_base(vm);
+
     vm.push_string("constructor");
     vm.new_closure((vm) => {
         var top = vm.get_top();
@@ -43,6 +46,28 @@ private void expose_box(Squirrel.Vm vm)
     }, 0);
     vm.new_slot(-3, false); // add the constructor to the class
 
+    vm.push_string("__children"); // keep a reference of the child widgets
+    vm.new_array(0);
+    vm.new_slot(-3, false); 
+
+
+    vm.push_string("add");
+    vm.new_closure((vm) => {
+        var wr = vm.get_instance(1) as Gtk.Box;
+        var w = vm.get_instance(2) as Gtk.Widget;
+        wr.add(w);
+
+        vm.push_string("__children");
+        vm.get(1);
+        Squirrel.Obj widg;
+        vm.get_stack_object(2, out widg);
+        vm.push_object(widg);
+        vm.array_append(-2);
+
+        return 0;
+    }, 0);
+    vm.set_params_check(2, "xx");
+    vm.new_slot(-3, false); // add the add method to the class
 
     vm.push_string("pack_start");
     vm.new_closure((vm) => {
@@ -50,6 +75,16 @@ private void expose_box(Squirrel.Vm vm)
         var box = vm.get_instance(1) as Gtk.Box;
         Gtk.Widget* w;
         vm.get_instance_up(2, out w, null, false);
+
+        vm.push_string("__children");
+        vm.get(1);
+        Squirrel.Obj widg;
+        vm.get_stack_object(2, out widg);
+        vm.push_object(widg);
+        vm.array_append(-2);
+        vm.pop(1);
+
+
         bool expand = false;
         bool fill = false;
         long padding = 0;
@@ -79,6 +114,16 @@ private void expose_box(Squirrel.Vm vm)
         var box = vm.get_instance(1) as Gtk.Box;
         Gtk.Widget* w;
         vm.get_instance_up(2, out w, null, false);
+
+        vm.push_string("__children");
+        vm.get(1);
+        Squirrel.Obj widg;
+        vm.get_stack_object(2, out widg);
+        vm.push_object(widg);
+        vm.array_append(-2);
+        vm.pop(1);
+
+
         bool expand = false;
         bool fill = false;
         long padding = 0;

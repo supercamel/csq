@@ -31,6 +31,7 @@ source = files(
   'ui/menu.vala',
   'ui/drawing_area.vala',
   'ui/file_chooser.vala',
+  'ui/scrolled.vala',
   'web/request.vala',
   'web/spino.vala',
   'json/json.vapi',

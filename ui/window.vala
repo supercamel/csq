@@ -201,6 +201,11 @@ private void expose_window(Squirrel.Vm vm)
         Gtk.Widget* w;
         vm.get_instance_up(2, out w, null, false);
         window.add(w);
+
+        vm.push_string("__children");
+        vm.get(1);
+        vm.push(2);
+        vm.array_append(-2);
         return 0;
     }, 0);
     vm.set_params_check(2, "xx");
@@ -237,6 +242,10 @@ private void expose_window(Squirrel.Vm vm)
         return 0;
     }, 0);
     vm.set_params_check(1, "x");
+    vm.new_slot(-3, false);
+
+    vm.push_string("__children");
+    vm.new_array(0);
     vm.new_slot(-3, false);
 
     vm.new_slot(-3, false);

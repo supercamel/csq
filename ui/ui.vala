@@ -21,6 +21,7 @@ void init(Squirrel.Vm vm)
     expose_cairo_context(vm);
     expose_drawing_area(vm);
     expose_file_chooser(vm);
+    expose_scrolled(vm);
 
     vm.new_slot(-3, false);
     vm.pop(1);

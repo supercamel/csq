@@ -157,6 +157,39 @@ private void expose_treeview(Squirrel.Vm vm)
     vm.set_params_check(2, "xa");
     vm.new_slot(-3, false);
 
+    vm.push_string("remove_row");
+    vm.new_closure((vm) => {
+        var br = vm.get_instance(1) as Gtk.TreeView;
+
+        long row;
+        vm.get_int(-1, out row);
+
+        var model = br.get_model() as Gtk.ListStore;
+        Gtk.TreeIter iter;
+        model.get_iter_from_string(out iter, row.to_string());
+        model.remove(ref iter);
+
+        vm.push_string("__n_rows");
+        if(vm.get(1) != Squirrel.OK) {
+            vm.pop(1);
+            warning("Could not get __n_rows attirubte from ui.Table");
+        }
+        else {
+            long n_rows;
+            vm.get_int(-1, out n_rows);
+            n_rows--;
+            stdout.printf("n rows: %ld\n", n_rows);
+
+            vm.push_string("__n_rows");
+            vm.push_int(n_rows);
+            vm.set(1);
+        }
+
+        return 0;
+    }, 0);
+    vm.set_params_check(2, "xi");
+    vm.new_slot(-3, false);
+
     vm.push_string("get_row");
     vm.new_closure((vm) => {
         var br = vm.get_instance(1) as Gtk.TreeView;

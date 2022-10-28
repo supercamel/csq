@@ -72,6 +72,54 @@ namespace ui
         vm.set_params_check(1, "x");
         vm.new_slot(-3, false);
 
+        vm.push_string("show_text");
+        vm.new_closure((vm) => {
+            Cairo.Context* cr = vm.get_instance(1);
+            string text;
+            vm.get_string(2, out text);
+            cr->show_text(text);
+            return 0;
+        }, 0);
+        vm.set_params_check(2, "xs");
+        vm.new_slot(-3, false);
+
+        vm.push_string("get_text_extents");
+        vm.new_closure((vm) => {
+            Cairo.Context* cr = vm.get_instance(1);
+            string text;
+            vm.get_string(2, out text);
+            Cairo.TextExtents extents;
+            cr->text_extents(text, out extents);
+            vm.new_table();
+            vm.push_string("x_bearing");
+            vm.push_float((float)extents.x_bearing);
+            vm.new_slot(-3, false);
+
+            vm.push_string("y_bearing");
+            vm.push_float((float)extents.y_bearing);
+            vm.new_slot(-3, false);
+
+            vm.push_string("width");
+            vm.push_float((float)extents.width);
+            vm.new_slot(-3, false);
+
+            vm.push_string("height");
+            vm.push_float((float)extents.height);
+            vm.new_slot(-3, false);
+
+            vm.push_string("x_advance");
+            vm.push_float((float)extents.x_advance);
+            vm.new_slot(-3, false);
+
+            vm.push_string("y_advance");
+            vm.push_float((float)extents.y_advance);
+            vm.new_slot(-3, false);
+
+            return 1;
+        }, 0);
+        vm.set_params_check(2, "xs");
+        vm.new_slot(-3, false);
+
         vm.push_string("fill");
         vm.new_closure((vm) => {
             Cairo.Context* cr = vm.get_instance(1);
@@ -150,7 +198,6 @@ namespace ui
         vm.new_closure((vm) => {
             Squirrel.Obj o;
             vm.get_stack_object(1, out o);
-            vm.add_ref(o);
 
             var da = vm.get_instance(1) as DrawingArea;
 

@@ -86,11 +86,21 @@ namespace ui {
             string filter_string = "";
             vm.get_string(2, out filter_string);
             filter.add_pattern(filter_string);
+            filter.set_filter_name(filter_string);
             f.add_filter(filter);
             return 0;
         }, 0);
         vm.set_params_check(2, "xs");
         vm.new_slot(-3, false); // add the set_filter method to the class
+
+        vm.push_string("destroy");
+        vm.new_closure((vm) => {
+            Gtk.FileChooserNative f = vm.get_instance(1) as Gtk.FileChooserNative;
+            f.destroy();
+            return 0;
+        }, 0);
+        vm.set_params_check(1, "x");
+        vm.new_slot(-3, false);
 
         vm.new_slot(-3, false);
     }
