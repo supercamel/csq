@@ -6,7 +6,7 @@ dependencies = [
   dependency('libsquirrel3'),
   dependency('gmodule-2.0'),
   dependency('libsoup-2.4'),
-  dependency('spino-1.0'),
+  dependency('spino-1.2'),
   dependency('gtk+-3.0'),
   meson.get_compiler('c').find_library('m', required: false)
   ]

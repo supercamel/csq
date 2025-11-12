@@ -2,7 +2,7 @@
 function my_thread()
 {
     print("thread starting\n");
-    sleep_thread(1000);
+    sleep_async(1000);
     print("end thread\n");
 //    ui.main_quit();
 }

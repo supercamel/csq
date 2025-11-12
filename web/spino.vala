@@ -59,18 +59,6 @@ namespace web
         vm.set_params_check(2, "xi");
         vm.new_slot(-3, false);
 
-        vm.push_string("set_projection");
-        vm.new_closure((vm) => {
-            var cur = vm.get_instance(1) as Spino.Cursor;
-            string proj;
-            vm.get_string(-1, out proj);
-            cur.set_projection(proj);
-            vm.pop(1);
-            return 1;
-        }, 0);
-        vm.set_params_check(2, "xs");
-        vm.new_slot(-3, false);
-
         vm.new_slot(-3, false);
     }
 
@@ -256,23 +244,11 @@ namespace web
             var col = vm.get_instance(1) as Spino.Collection;
             string query;
             vm.get_string(-1, out query);
-            uint n = col.drop(query, uint32.MAX);
+            uint n = col.drop(query);
             vm.push_int((long)n);
             return 1;
         }, 0);
         vm.set_params_check(2, "xs");
-        vm.new_slot(-3, false);
-
-        vm.push_string("drop_older_than");
-        vm.new_closure((vm) => {
-            var col = vm.get_instance(1) as Spino.Collection;
-            long timestamp;
-            vm.get_int(-1, out timestamp);
-
-            col.drop_older_than(timestamp);
-            return 0;
-        }, 0);
-        vm.set_params_check(2, "xi");
         vm.new_slot(-3, false);
 
         vm.push_string("size");
