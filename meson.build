@@ -18,6 +18,7 @@ source = files(
   'module.vala',
   'object_wrapper.vala',
   'callback.vala',
+  'console/application.vala',
   'ui/ui.vala',
   'ui/window.vala',
   'ui/box.vala',
@@ -38,5 +39,5 @@ source = files(
   'json/json.cpp'
   )
 
-executable('csq', source, include_directories: incdir, dependencies: dependencies)
+executable('csq', source, include_directories: incdir, dependencies: dependencies, install: true)
 
