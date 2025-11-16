@@ -102,7 +102,7 @@ struct MyHandler : public BaseReaderHandler<UTF8<>, MyHandler> {
     SquirrelVm* vm;
 };
 
-glong json_parse(SquirrelVm* vm)
+glong json_parse(SquirrelVm* vm, gpointer user_data)
 {
     gchar* json;
     squirrel_vm_get_string(vm, -1, &json);
@@ -116,7 +116,7 @@ glong json_parse(SquirrelVm* vm)
     return 1;
 }
 
-glong json_stringify(SquirrelVm* vm)
+glong json_stringify(SquirrelVm* vm, gpointer user_data)
 {
     switch(squirrel_vm_get_object_type(vm, -1))
     {
@@ -140,7 +140,7 @@ glong json_stringify(SquirrelVm* vm)
 
 
                     ss << "\"" << key << "\":";
-                    json_stringify(vm);
+                    json_stringify(vm, nullptr);
 
                     gchar* val;
                     squirrel_vm_get_string(vm, -1, &val);
@@ -166,7 +166,7 @@ glong json_stringify(SquirrelVm* vm)
                         ss << ",";
                     }
                     gchar* val;
-                    json_stringify(vm);
+                    json_stringify(vm, nullptr);
                     squirrel_vm_get_string(vm, -1, &val);
                     ss << val;
 
@@ -215,7 +215,7 @@ glong json_stringify(SquirrelVm* vm)
     return 1;
 }
 
-glong json_parse_file(SquirrelVm* vm) 
+glong json_parse_file(SquirrelVm* vm, void* user_data) 
 {
     gchar* filename;
     squirrel_vm_get_string(vm, -1, &filename);
@@ -247,17 +247,17 @@ void expose_json(SquirrelVm* vm)
     squirrel_vm_new_table(vm);
 
     squirrel_vm_push_string(vm, "parse");
-    squirrel_vm_new_closure(vm, json_parse, 0);
+    squirrel_vm_new_closure(vm, json_parse, nullptr, 0);
     squirrel_vm_set_params_check(vm, 2, ".s");
     squirrel_vm_new_slot(vm, -3, FALSE);
 
     squirrel_vm_push_string(vm, "stringify");
-    squirrel_vm_new_closure(vm, json_stringify, 0);
+    squirrel_vm_new_closure(vm, json_stringify, nullptr, 0);
     squirrel_vm_set_params_check(vm, 2, "..");
     squirrel_vm_new_slot(vm, -3, FALSE);
 
     squirrel_vm_push_string(vm, "parse_file");
-    squirrel_vm_new_closure(vm, json_parse_file, 0);
+    squirrel_vm_new_closure(vm, json_parse_file, nullptr, 0);
     squirrel_vm_set_params_check(vm, 2, ".s");
     squirrel_vm_new_slot(vm, -3, FALSE);
 

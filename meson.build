@@ -2,6 +2,7 @@ project('camsq', 'vala', 'cpp')
 
 dependencies = [
   dependency('glib-2.0'),
+  dependency('gee-0.8'),
   dependency('gobject-2.0'),
   dependency('libsquirrel3'),
   dependency('gmodule-2.0'),
@@ -15,10 +16,10 @@ incdir = include_directories('json')
 
 source = files(
   'main.vala',
-  'module.vala',
   'object_wrapper.vala',
   'callback.vala',
-  'console/application.vala',
+  'thread_registry.vala',
+  'system/application.vala',
   'ui/ui.vala',
   'ui/window.vala',
   'ui/box.vala',
