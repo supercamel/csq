@@ -16,28 +16,12 @@ incdir = include_directories('json')
 
 source = files(
   'main.vala',
-  'object_wrapper.vala',
-  'callback.vala',
+  'sleep.vala',
+  'async.vala',
   'thread_registry.vala',
-  'system/application.vala',
-  'ui/ui.vala',
-  'ui/window.vala',
-  'ui/box.vala',
-  'ui/label.vala',
-  'ui/button.vala',
-  'ui/entry.vala',
-  'ui/treeview.vala',
-  'ui/main_loop.vala',
-  'ui/widget.vala',
-  'ui/messagebox.vala',
-  'ui/menu.vala',
-  'ui/drawing_area.vala',
-  'ui/file_chooser.vala',
-  'ui/scrolled.vala',
-  'web/request.vala',
-  'web/spino.vala',
-  'json/json.vapi',
-  'json/json.cpp'
+  'main_loop.vala',
+  'json/json.cpp',
+  'json/json.vapi'
   )
 
 executable('csq', source, include_directories: incdir, dependencies: dependencies, install: true)

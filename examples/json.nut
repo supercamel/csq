@@ -1,3 +1,4 @@
+#!/usr/local/bin/csq
 
 local j = json.parse("{\"field\": 100}");
 
@@ -16,4 +17,14 @@ print(json.stringify(j));
 print("\n");
 
 
+// now test a really big object
+j = {};
+for (local i = 0; i < 10000000; i++) {
+	j["key_" + i]<- "value_" + i;
+}
+local str = json.stringify(j);
+
+local j2 = json.parse(str);
+
 //json.parse("{bad json}");
+

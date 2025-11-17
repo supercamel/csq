@@ -1,11 +1,3 @@
-long deregister_thread(void* ptr, long sz) {
-        uint id = (uint)ptr;
-        thread_registry.unregister_thread(id);
-        return Squirrel.OK;
-    }
-
-namespace console
-{
 
    class ConsoleApplication : GLib.Application
 {
@@ -56,59 +48,8 @@ namespace console
         vm.push_string("system");
         vm.new_table();
 
-        vm.push_string("run_async");
-        vm.new_closure((vm) => {
-            long top = vm.get_top();
-
-            // arg 1: system table
-            // arg 2: foo (the async function)
-            Squirrel.Obj foo;
-            vm.get_stack_object(2, out foo);
-
-            stdout.printf("creating async thread...\n");
-            stdout.flush();
-
-            // Create new Squirrel thread VM
-            var thread_vm = vm.new_thread(1024 * 16);
-
-            //Ref the thread
-            Squirrel.Obj thread_obj;
-            vm.get_stack_object(-1, out thread_obj);
-            vm.add_ref(thread_obj);
-
-            // Register it in your registry and stash ID as foreign pointer
-            uint id = thread_registry.register_thread(thread_vm);
-            thread_vm.set_foreign_pointer((void*) id);
-            thread_vm.set_vm_release_hook((ptr, sz) => { 
-                uint _id = (uint)ptr; 
-                thread_registry.unregister_thread(_id); 
-                return Squirrel.OK; 
-            });
-
-            thread_vm.push_object(foo);
-            thread_vm.push_root_table();         // or whatever 'this' / env you want to pass
-            
-            stdout.printf("Starting async thread...\n");
-            stdout.flush();
-
-            if (thread_vm.call(1, false, false) != Squirrel.OK) {
-                thread_vm.get_last_error();
-                string msg;
-                thread_vm.get_string(-1, out msg);
-                warning("Error in async thread: %s", msg);
-                // unref thread
-                vm.release(thread_obj);
-            }
-
-            // run_async returns nothing, or you can return the thread_obj if you want a handle
-            return 0;
-        }, 0);
-        vm.set_params_check(2, ".c"); // system + closure
-        vm.new_slot(-3, false);
-
         vm.push_string("get_args");
         vm.new_closure((vm) => {
-            var app = vm.get_instance(1) as ConsoleApplication;
             vm.new_array(0);
             for(int i = 0; i < args.length; i++) {
                 vm.push_string(args[i]);
@@ -195,7 +136,11 @@ namespace console
         vm.new_slot(-3, false);
 
         vm.push_string("run");
-        vm.new_closure((vm) => {
+        vm.new_closure((inner_vm) => {
+            if(check_async_registration(inner_vm)) {
+                error("ConsoleApplication.run cannot be called from an async thread.");
+                return 0;
+            }
             var app = vm.get_instance(1) as ConsoleApplication;
             app.run(args);
             return 0;
@@ -229,4 +174,3 @@ namespace console
         // add the console table to the root table
         vm.new_slot(-3, false);
     }
-}

@@ -1,2 +1,4 @@
-require("examples/hello_world.nut");
-require("examples/hello_world.nut");
+#!/usr/local/bin/csq
+
+require("hello_world.nut");
+require("hello_world.nut");

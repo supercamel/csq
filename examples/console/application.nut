@@ -1,22 +1,43 @@
 #!/usr/local/bin/csq
 
+class AsyncTimer {
+	function run(name, app, ms, break_count) {
+		while (true) {
+			sleep_async(ms);
+			print("AsyncTimer " + name + ": " + this.count++ + "\n");
+
+			if (count == break_count) {
+				break;
+			}
+		}
+	}
+
+	count = 0;
+}
+
 class MyApp extends system.ConsoleApplication {
-    constructor(app_id, title, description, version) {
-        base.constructor(app_id, title, description, version);
-    }
+	constructor(app_id, title, description, version) {
+		base.constructor(app_id, title, description, version);
+	}
 
-
-	function activate() {
+	function main() {
 		print("MyApp activated!\n");
 		local args = system.get_args();
 
-		system.run_async(function() {
-			print("This is an async method inside a thread!\n");
-			sleep_async(500);
-			print("Async method inside thread complete!\n");
-			this.release();
-		}.bindenv(this));
 		this.hold();
+
+		local timer = AsyncTimer();
+		local async_handle = async_run(timer.run.bindenv(timer), "A", this, 100, 100);
+
+		sleep_async(500);
+		async_handle.cancel();
+		this.release();
+
+		print(json.stringify(async_handle) + "\n");
+	}
+
+	function activate() {
+		async_run(this.main.bindenv(this));
 	}
 }
 
