@@ -6,6 +6,9 @@
 using GLib;
 using Gee;
 
+namespace csq 
+{
+
 public delegate void RequirePluginFunction (Squirrel.Vm vm);
 
 class csqApp : GLib.Application {
@@ -17,7 +20,6 @@ class csqApp : GLib.Application {
     private HashSet<string> require_loading = new HashSet<string>();
 
     public static int main (string[] args) {
-        Gtk.init (ref args);
         var app = new csqApp ();
         return app.run (args);
     }
@@ -85,13 +87,9 @@ class csqApp : GLib.Application {
         expose_sleep (vm);
         expose_json (vm);
         expose_main_loop (vm);
-        // web.init(vm);   // move HTTP out to a module later
 
         // Inject robust require()
         inject_require (vm);
-
-        // Optionally pass script args via a console module later
-        // console.expose_application(vm, args);
 
         // Execute the script (no push_ret here; script is the entrypoint, not a require'd module)
         if (!vm.do_file (script_path, false, true)) {
@@ -168,6 +166,7 @@ class csqApp : GLib.Application {
                 long top_after = vm.get_top ();
                 if (top_after != top_before + 1) {
                     require_loading.remove (spec);
+                    stdout.printf("Top before: %d, after: %d\n", (int)top_before, (int)top_after);
                     return vm.throw_error ("csq_require() must push a single exports value");
                 }
 
@@ -236,9 +235,52 @@ class csqApp : GLib.Application {
 
     // Try to open a native module via CSQ_PATH, PWD, then PATH
     private Module? open_native_module (string spec) {
+        string? usr_directory = Environment.get_home_dir();
+        if (usr_directory == null) {
+            // Handle error case where home directory couldn't be determined
+            usr_directory = "";
+        }
+
+        string? cwd = Environment.get_current_dir();
+        if (cwd == null) {
+            cwd = ".";
+        }
+
+        #if WINDOWS
+        string[] paths = {
+            Path.build_filename(cwd, "modules"),
+            Path.build_filename(usr_directory, "csq", "modules"),
+            "C:\\csq\\modules"
+        };
+        string lib_name = "lib" + spec + ".dll";
+        #else
+        string[] paths = {
+            Path.build_filename(cwd, "modules"),
+            Path.build_filename(usr_directory, ".csq", "modules"),
+            "/usr/lib/csq/modules",
+            "/usr/local/lib/csq/modules",
+        };
+
+        string lib_name = "lib" + spec + ".so";
+        #endif
+
+        foreach (string dir in paths) {
+            try {
+                string p = Module.build_path(dir, lib_name);
+                stdout.printf("Trying to load module from %s\n", p);
+                Module m = Module.open(p, ModuleFlags.LAZY);
+                if (m != null) {
+                    return m;
+                }
+            } catch (Error e) {
+                // Log or ignore the error and try next path
+                stderr.printf("Failed to load module from %s: %s\n", dir, e.message);
+                continue;
+            }
+        }
         // CSQ_PATH
         foreach (var dir in split_paths (Environment.get_variable ("CSQ_PATH"))) {
-            string p = Module.build_path (dir, spec);
+            string p = Module.build_path (dir, lib_name);
             var m = Module.open (p, ModuleFlags.LAZY);
             if (m != null) return m;
         }
@@ -246,14 +288,14 @@ class csqApp : GLib.Application {
         // PWD
         string pwd = Environment.get_variable ("PWD") ?? ".";
         {
-            string p = Module.build_path (pwd, spec);
+            string p = Module.build_path (pwd, lib_name);
             var m = Module.open (p, ModuleFlags.LAZY);
             if (m != null) return m;
         }
 
         // PATH entries
         foreach (var dir in split_paths (Environment.get_variable ("PATH"))) {
-            string p = Module.build_path (dir, spec);
+            string p = Module.build_path (dir, lib_name);
             var m = Module.open (p, ModuleFlags.LAZY);
             if (m != null) return m;
         }
@@ -270,5 +312,7 @@ class csqApp : GLib.Application {
 #endif
         return s.split (sep);
     }
+
+}
 
 }

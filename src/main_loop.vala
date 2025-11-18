@@ -1,4 +1,7 @@
 
+namespace csq
+{
+
 GLib.MainLoop main_loop = null;
 
 void expose_main_loop(Squirrel.Vm vm)
@@ -29,4 +32,6 @@ void expose_main_loop(Squirrel.Vm vm)
     vm.new_slot(-3, false);
 
     vm.new_slot(-3, false);
+}
+
 }

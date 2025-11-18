@@ -1,4 +1,8 @@
 using Gee; 
+
+namespace csq
+{
+
 public class ThreadRegistry : Object {
     private uint next_id = 1;
     private HashMap<uint, SquirrelThread> threads;
@@ -52,3 +56,5 @@ public class ThreadRegistry : Object {
 }
 
 ThreadRegistry thread_registry;
+
+}

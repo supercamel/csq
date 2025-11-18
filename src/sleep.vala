@@ -1,4 +1,6 @@
 
+namespace csq
+{
 void expose_sleep(Squirrel.Vm vm)
 {
     vm.push_string("sleep_async");
@@ -65,3 +67,4 @@ void expose_sleep(Squirrel.Vm vm)
     vm.new_slot(-3, false);
 }
 
+}

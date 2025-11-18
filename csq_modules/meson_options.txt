@@ -1,0 +1,1 @@
+option('install_to_system', type : 'boolean', value : false, description : 'Install to system directory instead of home directory')
