@@ -31,7 +31,7 @@ message('Installing modules to: ' + modules_install_dir)
 
 # Find all module directories
 modules = []
-foreach dir : ['web']  # Add your module names here
+foreach dir : ['web', 'console']  # Add your module names here
     if run_command('test', '-d', dir, check: false).returncode() == 0
         modules += dir
     endif

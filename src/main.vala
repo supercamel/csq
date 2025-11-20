@@ -10,6 +10,7 @@ namespace csq
 {
 
 public delegate void RequirePluginFunction (Squirrel.Vm vm);
+public delegate void InitPluginFunction (Squirrel.Vm vm, string[] args);
 
 class csqApp : GLib.Application {
     private Squirrel.Vm vm;
@@ -89,7 +90,7 @@ class csqApp : GLib.Application {
         expose_main_loop (vm);
 
         // Inject robust require()
-        inject_require (vm);
+        inject_require (vm, args);
 
         // Execute the script (no push_ret here; script is the entrypoint, not a require'd module)
         if (!vm.do_file (script_path, false, true)) {
@@ -105,7 +106,7 @@ class csqApp : GLib.Application {
 
     // ---------------------- require() implementation ----------------------
 
-    private void inject_require (Squirrel.Vm vm) {
+    private void inject_require (Squirrel.Vm vm, string[] args) {
         vm.push_string ("require");
         vm.new_closure ((vm) => {
             // Signature: require(spec: string) -> exports(any)
@@ -154,6 +155,12 @@ class csqApp : GLib.Application {
                 mod.make_resident ();
 
                 void* sym = null;
+				if(mod.symbol("csq_init", out sym) && sym != null) {
+					InitPluginFunction ri = (InitPluginFunction)sym;
+					ri(vm, args);
+				}
+				sym = null;
+
                 if (!mod.symbol ("csq_require", out sym) || sym == null) {
                     require_loading.remove (spec);
                     return vm.throw_error ("Native module '" + spec + "' missing csq_require()");
